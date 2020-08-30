@@ -1,32 +1,20 @@
 import pandas as pd
+# import sklearn
 
-import sklearn
 
-def execute(input_file, output_file, force_write = True):
-    """Builds features
+class BuildFeatures:
 
-    Args:
-        input_file (str): input file.
-    """
-    df = pd.read_csv(input_file)
+    def __init__(self, input_data):
+        self.data = input_data
 
-    df["Sex"] = df["Sex"].replace("male", 0)
-    df["Sex"] = df["Sex"].replace("female", 1)
+    def execute(self):
+        """Builds features"""
 
-    embarked_dict = {}
-    embarked_dict_values = 0
-    for i in df.Embarked:
-        if i in embarked_dict.keys():
-            pass
-        else:
-            embarked_dict_values = embarked_dict_values + 1
-            embarked_dict[i] = embarked_dict_values
-    
-    for i in embarked_dict.keys():
-        df["Embarked"].replace(i, embarked_dict[i], inplace = True)
+        self.data["Sex"] = self.data["Sex"].map({'male': 0, 'female': 1})
+        self.data['Embarked'] = self.data['Embarked'].astype('category').cat.codes
 
-    df["FamilySize"] = df["SibSp"] + df["Parch"] + 1
-    df["IsAlone"] = 0
-    df.loc[df["FamilySize"] == 1, "IsAlone"] = 1
+        self.data["FamilySize"] = self.data["SibSp"] + self.data["Parch"] + 1
+        self.data["IsAlone"] = 0
+        self.data.loc[self.data["FamilySize"] == 1, "IsAlone"] = 1
 
-    df.to_csv(output_file)
+        return self.data

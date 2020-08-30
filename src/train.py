@@ -1,38 +1,47 @@
-import numpy as np
+# import numpy as np
 import pandas as pd
-import sklearn
 import pickle as pkl
 
-    # Split the data for training.
-df = pd.read_csv("data/train_bf.csv")
-
-y = df["Survived"]
-
-tr_col = []
-for c in df.columns:
-    if c == "Survived":
-        pass
-    else:
-        tr_col.append(c)
-
-# Create a classifier and select scoring methods.
 from sklearn.ensemble import RandomForestClassifier
-clf = RandomForestClassifier(n_estimators=10)
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+from src.preprocess import Preprocess
+from src.build_features import BuildFeatures
 
 
-# Fit full model and predict on both train and test.
-clf.fit(df[tr_col], y)
-preds = clf.predict(df[tr_col])
-metric_name = "train_accuracy"
-metric_result = sklearn.metrics.accuracy_score(y, preds)
+class Train:
 
-model_pickle = open("data/model.pkl", 'wb')
-pkl.dump(clf, model_pickle)
-model_pickle.close()
+    def __init__(self, input_data, model_path, sep=','):
+        self.data = pd.read_csv(input_data, sep=sep)
+        self.model_path = model_path
 
-# Return metrics and model.
-info = ""
-info = info + metric_name
-info = info + " for the model is "
-info = info + str(metric_result)
-print(info)
+    def run(self):
+        """Trains the model"""
+        preproc_train_data = Preprocess(self.data)
+        preproc = preproc_train_data.execute()
+
+        bf_train = BuildFeatures(preproc)
+        features = bf_train.execute()
+
+        # Split the data for training.
+        X = features.drop("Survived", axis=1)
+        y = features["Survived"]
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+
+        # Create a classifier and select scoring methods.
+        clf = RandomForestClassifier(n_estimators=10)
+
+        # Fit full model and predict on both train and test.
+        clf.fit(X_train, y_train)
+        y_preds = clf.predict(X_test)
+
+        metric_name = "train_accuracy"
+        metric_result = accuracy_score(y_test, y_preds)
+
+        model_pickle = open(self.model_path, 'wb')
+        pkl.dump(clf, model_pickle)
+        model_pickle.close()
+
+        # Return metrics and model.
+        print(f"{metric_name} for the model is {metric_result}.")

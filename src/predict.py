@@ -1,25 +1,31 @@
 import pandas as pd
 import pickle as pkl
+from sklearn.metrics import accuracy_score
 
-df = pd.read_csv("data/val_bf.csv")
+from src.preprocess import Preprocess
+from src.build_features import BuildFeatures
 
-df.dropna(inplace = True)
 
-target = df["Survived"]
-del(df["Survived"])
-    
-model_unpickle = open("data/model.pkl", 'rb')
-model = pkl.load(model_unpickle)
-model.close()
+class Predict:
 
-predictions = model.predict(df)
-# Reassign target (if it was present) and predictions.
-df["prediction"] = predictions
-df["target"] = target
+    def __init__(self, input_data, model_path, sep=','):
+        self.data = pd.read_csv(input_data, sep=sep)
+        self.model_path = model_path
 
-ok = 0
-for i in df.iterrows():
-    if (i[1]["target"] == i[1]["prediction"]):
-        ok = ok + 1
+    def run(self):
+        """Trains the model"""
+        preproc_data = Preprocess(self.data)
+        preproc = preproc_data.execute()
 
-print("accuracy is", ok / df.shape[0])
+        bf_predict = BuildFeatures(preproc)
+        features = bf_predict.execute()
+
+        X = features.drop("Survived", axis=1)
+        y = features["Survived"]
+
+        model_unpickle = open(self.model_path, 'rb')
+        model = pkl.load(model_unpickle)
+        predictions = model.predict(X)
+        model_unpickle.close()
+        # Reassign target (if it was present) and predictions.
+        print("Accuracy is", accuracy_score(y, predictions))
