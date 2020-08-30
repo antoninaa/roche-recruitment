@@ -16,7 +16,7 @@ __val.csv__ with 89 records and 12 columns
 Both datasets reveal whether a passanger survived or not.
 <br>
 
-Column description:
+Columns description:
 - __passengerId__ : passenger identification number for this dataset
 - __survival__ : survival outcome (0 = No, 1 = Yes)
 - __pclass__ : ticket class
@@ -40,6 +40,6 @@ This project requires Python 3 and the following Python libraries installed:
 - pickle
 
 ### Run
-In order to run the code to train the model open a notebook __Titatnic_train_data.ipynb__, set the necessary variables and click Run All.<br>
+In order to run the code to train the model open a notebook __Titanic_train_data.ipynb__, set the necessary variables and click Run All.<br>
 
-In order to run the code to get the predictions open a notebook __Titatnic_predict_data.ipynb__, set the necessary variables and click Run All. (Prerequisite: run Titatnic_train_data.ipynb first to train the model used for predictions)
+In order to run the code to get the predictions open a notebook __Titanic_predict_data.ipynb__, set the necessary variables and click Run All. (Prerequisite: run Titatnic_train_data.ipynb first to train the model used for predictions)
