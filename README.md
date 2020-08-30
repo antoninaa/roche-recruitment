@@ -1,52 +1,45 @@
 # Titanic - data science project 
 
-## INTRODUCTION
+### Introduction
 This is simple data science project designed to predict whether a given person would survive the Titanic crash.
 
-It is not a ready-made project, but a starting point for You. It has been written without respecting good practices.
+### Code structure
+This repository includes:
+- 2 jupyter notebooks to run the code to train & predict the data
+- data/ : folder with dataset saved in csv format
+- src/ : folder with all necessary classes and functions
 
-We have come up with 9 tasks for you related to this project. Try to do them all in best possible way. Do not quit if you fail to complete all tasks. We would like to see your project, even if it is only partially ready.
+### Data
+There are 2 csv files containing Titanic data:<br>
+__train.csv__ with 802 records and 12 columns <br>
+__val.csv__ with 89 records and 12 columns
+Both datasets reveal whether a passanger survived or not.
+<br>
 
-Project is written in python, as it is the most usefull to work with us. However, if you are ninja in other language, and want to show off your skills, you can rewrite the code to other language.
+Column description:
+- __passengerId__ : passenger identification number for this dataset
+- __survival__ : survival outcome (0 = No, 1 = Yes)
+- __pclass__ : ticket class
+- __name__ : title and name
+- __sex__ :	gender
+- __age__ :	age in years	
+- __sibsp__ : # of siblings / spouses aboard the Titanic	
+- __parch__	: # of parents / children aboard the Titanic	
+- __ticket__ : ticket number	
+- __fare__ : passenger fare	
+- __cabin__ : cabin number	
+- __embarked__ : port of embarkation (C = Cherbourg, Q = Queenstown, S = Southampton)
 
-## TASKS
-Below you will find 9 tasks. Start from the first one. Further tasks can be done in any order you like and it is fine if you skip some of them.
+### ML algorithm
+RandomForestClassifier from __sklearn__ library was chosen as a machine learning algorithm to solve given problem in this project.
 
-### TASK1 - organizational instructions
- Create your own repository on Github or other public code versioning server. Use content of this project to create initial commit.
- 
- Follow the rules:
-* The solutions to all subsequnt tasks should be in your repository.
-* Each task should be solved in separate branch using any number of commits. You can edit the code or add additional file explaining your way of thinking. The branch name should be related to the task, so we can know which branch applies to which task.
-* All branches should finally be merged to master branch.
-* At the end remember to share your repository with us.
+### Install
+This project requires Python 3 and the following Python libraries installed:
+- Pandas
+- sklearn
+- pickle
 
-### TASK2 - sense of humour
-Add a file with your favourite joke to the docs directory.
+### Run
+In order to run the code to train the model open a notebook __Titatnic_train_data.ipynb__, set the necessary variables and click Run All.<br>
 
-### TASK3 - good practices
-* Correct the code so it is easy to read, run and reuse.
-* Remember about
-  * README.md files
-  * Code comments
-  * quality and performance of code -- remove or fix badly written code
-
-### TASK4 - feature engineering
-Propose better solution for feature engineering than the one given by us.
-
-### TASK5 - models
-Propose other prediction models than the one proposed by us. 
-
-### TASK6 - measures
-After completing TASK5, justify why you have chosen this particular model. Compare it with the model proposed by us or with any other model choosen by you. If you haven't completed TASK5, write theoretically how can you compare two solutions.
-
-### TASK7 - docker
-Prepare a Dockerfile that will allow us to run your code in the container.
-
-### TASK8 - tests
-Write unit tests covering your code.
-
-### TASK9 - prediction api
-Prepare a code that will share your model via API. It should be accessible by the HTTP protocol and accept and return data in JSON format
-
-## GOOD LUCK!!!
+In order to run the code to get the predictions open a notebook __Titatnic_predict_data.ipynb__, set the necessary variables and click Run All. (Prerequisite: run Titatnic_train_data.ipynb first to train the model used for predictions)

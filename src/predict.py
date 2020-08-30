@@ -16,7 +16,9 @@ class Predict:
         A path to file with data to use for prediction.
     model_path : str
         A path where trained model is stored.
-    
+    sep : str
+        A separator sign of files that are being uploaded to DataFrame. Default = ','
+
     Attributes
     ----------
     data : pandas.DataFrame

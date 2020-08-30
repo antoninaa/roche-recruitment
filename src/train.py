@@ -20,6 +20,8 @@ class Train:
         A path to file with data to use for model training.
     model_path : str
         A path where trained model will be stored.
+    sep : str
+        A separator sign of files that are being uploaded to DataFrame. Default = ','
     
     Attributes
     ----------
@@ -58,7 +60,7 @@ class Train:
         y_preds = clf.predict(X_test)
            
         # Select scoring metrics.
-        metric_name = "train_accuracy"
+        metric_name = "Train accuracy"
         metric_result = accuracy_score(y_test, y_preds)
         
         # Save model.
