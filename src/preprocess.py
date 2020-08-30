@@ -1,7 +1,3 @@
-import pandas as pd
-# import numpy as np
-
-
 class Preprocess:
     """
     The Preprocess class handles preprocessing of input data.
@@ -29,7 +25,7 @@ class Preprocess:
         pandas.DataFrame
             Preprocessed data.
         """
-        
-        self.data.drop(columns=["Name", "Ticket", "Cabin"], inplace=True)
-        self.data.dropna(inplace=True)
+
+        # Drop not relevant columns
+        self.data.drop(columns=["PassengerId", "Ticket", "Cabin"], inplace=True)
         return self.data
