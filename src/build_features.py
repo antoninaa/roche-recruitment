@@ -44,11 +44,11 @@ class BuildFeatures:
         self.data.drop(columns=["SibSp", "Parch"], inplace=True)
 
         # Feature 4: fare
-        self.data["Fare"] = pd.qcut(self.data["Fare"], 10).cat.codes
+        self.data["Fare"] = pd.qcut(self.data["Fare"], 5).cat.codes
 
         # Feature 5: age
         self.data["Age"] = self.fillna_with_mean("Age", "Title")
-        self.data["Age"] = pd.qcut(self.data["Age"], 10).cat.codes
+        self.data["Age"] = pd.qcut(self.data["Age"], 5, duplicates="drop").cat.codes
 
         # Feature 6: sex
         self.data["Sex"] = self.data["Sex"].map({'male': 0, 'female': 1})
@@ -107,8 +107,8 @@ class BuildFeatures:
         """
         self.data["Title"] = self.data[column].str.split(r'. |, ', expand=True)[1]
         title_list = ["Mr", "Miss", "Mrs", "Master"]
-        self.data["Title"] = self.data["Title"].apply(lambda x: x if x in title_list else None)
-        self.data[(self.data["Title"].isna()) & (self.data["Sex"] == "female"), "Title"] = "Miss"
+        self.data["Title"] = self.data.loc[self.data["Sex"] == 'female', "Title"].apply(lambda x: x if x in title_list else "Miss")
+        self.data.loc[(self.data["Title"].isna()) & (self.data["Sex"] == "female"), "Title"] = "Miss"
         self.data.loc[(self.data["Title"].isna()) & (self.data["Sex"] == "male"), "Title"] = "Mr"
 
     def fillna_with_mean(self, column2fill, column_cat):
