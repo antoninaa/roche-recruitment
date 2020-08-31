@@ -4,7 +4,9 @@ import pickle as pkl
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import roc_curve, auc
+from sklearn.metrics import accuracy_score, classification_report
+import matplotlib.pyplot as plt
 
 
 from src.preprocess import Preprocess
@@ -36,6 +38,30 @@ class Train:
         self.data = pd.read_csv(input_data, sep=sep)
         self.model_path = model_path
 
+    @staticmethod
+    def evaluate_model(y_test, y_preds):
+        # Accuracy score
+        metric_result = accuracy_score(y_test, y_preds)
+        print(f"Accuracy for this model is {metric_result}.")
+
+        # Classification report
+        cr = classification_report(y_test, y_preds, digits=3)
+        print("Classification report:")
+        print(cr)
+
+        # ROC
+        false_positive_rate, true_positive_rate, thresholds = roc_curve(y_test, y_preds)
+        roc_auc = auc(false_positive_rate, true_positive_rate)
+
+        roc_plot = plt.plot(false_positive_rate, true_positive_rate, \
+                            c='#2B94E9', label='AUC = %0.3f' % roc_auc)
+        plt.title('ROC')
+        plt.legend(loc='lower right')
+        plt.plot([0, 1], [0, 1], 'm--', c='#666666')
+        plt.xlim([0, 1])
+        plt.ylim([0, 1.1])
+        plt.show()
+
     def run(self):
         """
         Run the steps to train the model using RandomForestClassifier, save trained model and print the accuracy score for this model.
@@ -66,14 +92,10 @@ class Train:
         clf.fit(X_train, y_train)
         y_preds = clf.predict(X_test)
            
-        # Select scoring metrics.
-        metric_name = "Train accuracy"
-        metric_result = accuracy_score(y_test, y_preds)
-        
         # Save model.
         model_pickle = open(self.model_path, 'wb')
         pkl.dump(clf, model_pickle)
         model_pickle.close()
 
         # Print metrics.
-        print(f"{metric_name} for the model is {metric_result}.")
+        self.evaluate_model(y_test, y_preds)
