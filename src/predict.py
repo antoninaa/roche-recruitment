@@ -12,12 +12,10 @@ class Predict:
     
     Parameters
     ----------
-    input_data : str
+    input_data : pandas.DataFrame
         A path to file with data to use for prediction.
     model_path : str
         A path where trained model is stored.
-    sep : str
-        A separator sign of files that are being uploaded to DataFrame. Default = ','
 
     Attributes
     ----------
@@ -27,30 +25,33 @@ class Predict:
         This is where we store path of the trained model.
     """
     
-    def __init__(self, input_data, model_path, sep=','):
-        self.data = pd.read_csv(input_data, sep=sep)
+    def __init__(self, input_data, model_path):
+        self.data = input_data
         self.model_path = model_path
 
     def run(self):
         """
         Run the steps to predict the survival and print the accuracy score of the prediction.
         """
-        
+        data = self.data.copy()
         # Preprocess data and build features.
-        preproc_data = Preprocess(self.data)
+        preproc_data = Preprocess(data)
         preproc = preproc_data.execute()
 
         bf_predict = BuildFeatures(preproc)
         features = bf_predict.execute()
+        features_list = bf_predict.get_feature_columns()
 
-        X = features.drop("Survived", axis=1)
-        y = features["Survived"]
+        X = features[features_list]
 
         # Open model and make prediction.
         model_unpickle = open(self.model_path, 'rb')
         model = pkl.load(model_unpickle)
         predictions = model.predict(X)
         model_unpickle.close()
-        
-        # Print metrics for prediction.
-        print("Accuracy is", accuracy_score(y, predictions))
+
+        # Save predictions back to original data
+        self.data["Predictions"] = predictions
+
+        return predictions
+

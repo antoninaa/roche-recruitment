@@ -19,6 +19,7 @@ class BuildFeatures:
     
     def __init__(self, input_data):
         self.data = input_data
+        self.feature_columns = []
 
     def execute(self):
         """
@@ -29,51 +30,53 @@ class BuildFeatures:
         pandas.DataFrame
             Dataset with proper format for ML algorithms.
         """
+
         # Feature 1: title
         self.extract_title("Name")
-        self.data["Title"] = self.data["Title"].astype('category').cat.codes
+        self.data["Title"] = self.data["Title"].map({"Mr": 0, "Miss": 1, "Mrs": 2, "Master": 3})
         self.data.drop(columns=["Name"], inplace=True)
+        self.feature_columns.append("Title")
 
         # Feature 2: embarked
-        self.data["Embarked"] = self.fillna_with_most_common("Embarked")
-        self.data["Embarked"] = self.data["Embarked"].astype('category').cat.codes
+        self.data["Embarked"] = self.data["Embarked"].map({'C': 0, 'Q': 1, 'S': 2})
+        self.feature_columns.append("Embarked")
 
         # Feature 3: familySize
         self.data["FamilySize"] = self.data["SibSp"] + self.data["Parch"] + 1
-        self.data["FamilySize"] = self.frequency_encoding("FamilySize")
+        self.data["FamilySize"] = self.family_size_frequency_encoding("FamilySize")
         self.data.drop(columns=["SibSp", "Parch"], inplace=True)
+        self.feature_columns.append("FamilySize")
 
         # Feature 4: fare
-        self.data["Fare"] = pd.qcut(self.data["Fare"], 5).cat.codes
+        self.data["Fare"] = self.fare_frequency_encoding("Fare")
+        self.feature_columns.append("Fare")
 
         # Feature 5: age
-        self.data["Age"] = self.fillna_with_mean("Age", "Title")
         self.data["Age"] = pd.qcut(self.data["Age"], 5, duplicates="drop").cat.codes
+        self.feature_columns.append("Age")
 
         # Feature 6: sex
         self.data["Sex"] = self.data["Sex"].map({'male': 0, 'female': 1})
+        self.feature_columns.append("Sex")
 
         # Feature 7: pclass (no changes required)
+        self.feature_columns.append("Pclass")
 
         return self.data
 
-    def fillna_with_most_common(self, column):
+    def get_feature_columns(self):
         """
-        Fill missing values with the most common one in the column.
+        Return list of feature columns.
 
-        Parameters:
-        ----------
-        column: str
-            A column name to be processed.
         Return:
         ______
-        pandas.Series
-            A series with filled missing values
-        """
-        most_common = self.data[column].value_counts().idxmax()
-        return self.data[column].fillna(most_common)
+        list
+            List of column names
 
-    def frequency_encoding(self, column):
+        """
+        return self.feature_columns
+
+    def family_size_frequency_encoding(self, column):
         """
         Encode column based on frequency (hardcoded)
 
@@ -96,6 +99,54 @@ class BuildFeatures:
 
         return np.select(conditions, choices, default=-1)
 
+    def fare_frequency_encoding(self, column):
+        """
+        Encode column based on frequency (hardcoded)
+
+        Parameters:
+        ----------
+        column: str
+            A column name to be processed.
+        Return:
+        ______
+        pandas.Series
+            A series with codes
+        """
+        conditions = [
+            (self.data[column] <= 7.854),
+            (self.data[column] > 7.854) & (self.data[column] <= 10.5),
+            (self.data[column] > 10.5) & (self.data[column] <= 22.225),
+            (self.data[column] > 22.225) & (self.data[column] <= 39.688),
+            (self.data[column] > 39.688)]
+
+        choices = [0, 1, 2, 3, 4]
+
+        return np.select(conditions, choices, default=-1)
+
+    def age_frequency_encoding(self, column):
+        """
+        Encode column based on frequency (hardcoded)
+
+        Parameters:
+        ----------
+        column: str
+            A column name to be processed.
+        Return:
+        ______
+        pandas.Series
+            A series with codes
+        """
+        conditions = [
+            (self.data[column] <= 19),
+            (self.data[column] > 19) & (self.data[column] <= 25),
+            (self.data[column] > 25) & (self.data[column] <= 32),
+            (self.data[column] > 32) & (self.data[column] <= 42),
+            (self.data[column] > 42)]
+
+        choices = [0, 1, 2, 3, 4]
+
+        return np.select(conditions, choices, default=-1)
+
     def extract_title(self, column):
         """
         Extract title from name and fixes the wrong entries
@@ -111,25 +162,4 @@ class BuildFeatures:
         self.data.loc[(self.data["Title"].isna()) & (self.data["Sex"] == "female"), "Title"] = "Miss"
         self.data.loc[(self.data["Title"].isna()) & (self.data["Sex"] == "male"), "Title"] = "Mr"
 
-    def fillna_with_mean(self, column2fill, column_cat):
-        """
-        Fill missing values with the mean values of given category.
 
-        Parameters:
-        ----------
-        column2fill: str
-            A column name that is to be filled.
-        column_cat: str
-            A column name that we group by
-
-        Return:
-        ______
-        pandas.Series
-            A series with filled missing values
-        """
-        subset_df = self.data[[column2fill, column_cat]]
-        means = subset_df.groupby([column_cat])[column2fill].mean()
-        subset_df.set_index([column_cat], inplace=True)
-        subset_df = subset_df[column2fill].fillna(means)
-        subset_df = subset_df.reset_index()
-        return subset_df[column2fill]
